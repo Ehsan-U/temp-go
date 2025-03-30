@@ -17,7 +17,6 @@ RUN apt-get update && \
 # Copy and install requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir scrapy && \
     rm -rf /root/.cache/pip
 
 # Copy project files
