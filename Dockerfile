@@ -9,7 +9,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Install only the minimal required system dependencies
-RUN apt-get update && \
+RUN apt-get updatte && \
     apt-get install -y --no-install-recommends gcc libffi-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
