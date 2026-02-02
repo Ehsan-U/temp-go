@@ -29,15 +29,48 @@ chmod +x "$install_dir/magent"
 echo ""
 echo "installed magent $($install_dir/magent version) to $install_dir/magent"
 
-# check if install_dir is in PATH
+# create systemd service for autostart
+service_path="/etc/systemd/system/magent.service"
+tmp_service="/tmp/magent.service.$$"
+
+cat > "$tmp_service" << EOF
+[Unit]
+Description=Monitoring Agent
+After=network.target
+
+[Service]
+Type=forking
+User=$USER
+PIDFile=$HOME/.local/magent/magent.pid
+ExecStart=$install_dir/magent start
+ExecStop=$install_dir/magent stop
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+echo ""
+echo "installing systemd service (requires sudo)..."
+sudo mv "$tmp_service" "$service_path"
+sudo systemctl daemon-reload
+sudo systemctl enable magent.service
+echo "magent.service installed and enabled"
+
+# add to PATH if not already there
 if ! echo "$PATH" | grep -q "$install_dir"; then
-  echo ""
-  echo "note: add $install_dir to your PATH:"
-  echo "  export PATH=\"$install_dir:\$PATH\""
+  shell_rc="$HOME/.bashrc"
+  if [ -f "$HOME/.zshrc" ]; then
+    shell_rc="$HOME/.zshrc"
+  fi
+  echo "export PATH=\"$install_dir:\$PATH\"" >> "$shell_rc"
+  export PATH="$install_dir:$PATH"
+  echo "added $install_dir to PATH in $shell_rc"
 fi
 echo ""
 echo "commands:"
-echo "  magent start --token=<MASTER_TOKEN>  (first run)"
+echo "  magent start --token=<MASTER_TOKEN>  (first run, saves token)"
 echo "  magent stop"
 echo "  magent status"
 echo "  magent version"
