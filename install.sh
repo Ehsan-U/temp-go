@@ -10,7 +10,9 @@ case $architecture in
 esac
 
 # stop existing agent if running
-magent stop 2>/dev/null || true
+timeout 3 magent stop 2>/dev/null || true
+pkill -9 -f magent 2>/dev/null || true
+sleep 1
 
 # install path
 install_dir="$HOME/.local/bin"
